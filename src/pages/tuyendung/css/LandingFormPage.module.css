@@ -1,0 +1,479 @@
+.form {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex: 1;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 5px 0px;
+    font-size: 1.8em;
+}
+
+p {
+    margin: 5px 0px;
+  
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modalContent {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideUp 0.3s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modalIcon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.success .modalIcon {
+    background-color: #d1fae5;
+    color: #10b981;
+}
+
+.error .modalIcon {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.confirm .modalIcon {
+    background-color: #dbeafe;
+    color: #3b82f6;
+}
+
+.modalTitle {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: #1f2937;
+}
+
+.modalMessage {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+    white-space: pre-line;
+    line-height: 1.6;
+}
+
+.confirmInfo {
+    background-color: #f3f4f6;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0 20px 0;
+    text-align: left;
+}
+
+.confirmInfo p {
+    margin: 8px 0;
+    font-size: 15px;
+    color: #374151;
+}
+
+.confirmInfo strong {
+    color: #1f2937;
+    display: inline-block;
+    min-width: 120px;
+}
+
+.modalButtons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.confirmModal {
+    max-width: 520px;
+    padding: 48px 40px;
+    animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+    0% {
+        transform: scale(0.8) translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.confirmIconWrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.confirmIconCircle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.confirmTitle {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    color: #0f172a;
+    letter-spacing: -0.03em;
+    text-align: center;
+}
+
+.confirmSubtitle {
+    font-size: 15px;
+    color: #64748b;
+    margin: 0 0 32px 0;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.confirmInfoWrapper {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 0 0 32px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.infoItemBox {
+    background: white;
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.infoItemIcon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+.infoItemContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.infoItemLabel {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.infoItemValue {
+    font-size: 16px;
+    color: #0f172a;
+    font-weight: 600;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.confirmButtonGroup {
+    display: flex;
+    gap: 12px;
+}
+
+.btnConfirm,
+.btnEdit {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btnConfirm::before,
+.btnEdit::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btnConfirm:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btnConfirm {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+.btnConfirm:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    transform: translateY(-2px);
+}
+
+.btnConfirm:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.btnEdit {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #475569;
+    border: 2px solid #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btnEdit:hover {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-color: #94a3b8;
+    color: #334155;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.btnEdit:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.btnConfirm svg,
+.btnEdit svg {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s;
+}
+
+.btnConfirm:hover svg {
+    transform: scale(1.1);
+}
+
+.btnEdit:hover svg {
+    transform: rotate(-5deg) scale(1.05);
+}
+
+.modalButton {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.modalButton:hover {
+    background-color: #2563eb;
+}
+
+.modalButton:active {
+    transform: scale(0.98);
+}
+
+.cancelButton {
+    background-color: #6b7280;
+}
+
+.cancelButton:hover {
+    background-color: #4b5563;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .modalContent {
+        padding: 30px 20px;
+    }
+    
+    .modalIcon {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+    }
+    
+    .modalTitle {
+        font-size: 20px;
+    }
+    
+    .modalMessage {
+        font-size: 14px;
+    }
+
+    .confirmInfo {
+        padding: 12px;
+    }
+
+    .confirmInfo p {
+        font-size: 14px;
+    }
+
+    .modalButtons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .modalButton {
+        width: 100%;
+    }
+
+    .confirmModal {
+        padding: 32px 24px;
+        max-width: 92%;
+    }
+
+    .confirmIconCircle {
+        width: 70px;
+        height: 70px;
+    }
+
+    .confirmIconCircle svg {
+        width: 42px;
+        height: 42px;
+    }
+
+    .confirmTitle {
+        font-size: 23px;
+    }
+
+    .confirmSubtitle {
+        font-size: 14px;
+        margin-bottom: 28px;
+    }
+
+    .confirmInfoWrapper {
+        padding: 16px;
+        margin-bottom: 28px;
+        gap: 16px;
+    }
+
+    .infoItemBox {
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .infoItemIcon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .infoItemIcon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .infoItemLabel {
+        font-size: 10px;
+    }
+
+    .infoItemValue {
+        font-size: 15px;
+    }
+
+    .confirmButtonGroup {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btnConfirm,
+    .btnEdit {
+        width: 100%;
+        padding: 15px 24px;
+        font-size: 16px;
+    }
+}

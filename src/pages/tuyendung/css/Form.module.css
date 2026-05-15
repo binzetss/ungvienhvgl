@@ -1,0 +1,578 @@
+﻿
+.container {
+  padding: 12px 8px;
+}
+
+.headings {
+  margin-bottom: 20px;
+   text-align: center;  
+}
+
+.headings h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #0a4f8a;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e8f4fd;
+  position: relative;
+}
+
+.headings h1::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: #0e73ba;
+  border-radius: 2px;
+}
+
+.headings p {
+  font-size: 0.92rem;
+  color: #64748b;
+  margin-top: 8px;
+}
+.star {
+  color: #dc2626;
+  font-weight: 600;
+}
+.grid2 {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  align-items: stretch;
+}
+
+
+.field {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+
+.field label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: rgba(0, 0, 0, 0.75);
+}
+.classes.sectionTitle1{
+  font-size: 200px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: rgba(0, 0, 0, 0.75);
+
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #0e73ba;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.hint {
+  font-size: 0.75rem;
+  margin-top: 4px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.span2 {
+  grid-column: span 2;
+}
+
+.avatarBox {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatarPreview {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  border: 1px dashed rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: #fafafa;
+  transition: all 0.25s ease;
+}
+
+.avatarPreview:hover {
+  border-color: #0e73ba;
+  background-color: #f0f6ff;
+}
+
+.avatarPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarPreview span {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+@media (max-width: 768px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .span2 {
+    grid-column: auto;
+  }
+
+  .avatarBox {
+    align-items: flex-start;
+  }
+}
+.star {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.errorInput {
+  border-color: #dc2626 !important;
+}
+
+.errorInput:focus {
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+}
+
+.errorText {
+  font-size: 0.75rem;
+  margin-top: 4px;
+  color: #dc2626;
+}
+.sectionTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.75);
+  margin-top: 8px;
+}
+.reviewBox {
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.reviewItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(0,0,0,0.1);
+}
+
+.reviewLabel {
+  font-weight: 500;
+  color: rgba(0,0,0,0.7);
+}
+
+.reviewValue {
+  color: rgba(0,0,0,0.9);
+}
+.reviewContainer {
+  max-width: 820px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.reviewRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(0,0,0,0.1);
+}
+
+.reviewLabel {
+  font-weight: 500;
+  color: rgba(0,0,0,0.7);
+}
+
+.reviewValue {
+  color: rgba(0,0,0,0.9);
+  max-width: 60%;
+  text-align: right;
+}
+
+.avatarReview img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.filePreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.filePreview img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.filePreview iframe {
+  width: 100%;
+  height: 120px;
+  border: none;
+}
+
+.filePreview span {
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 4px;
+  text-align: center;
+}
+.degreeActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.btnAdd {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px dashed #2563eb;
+  background-color: #f8fbff;
+  color: #2563eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnAdd:hover {
+  background-color: #eaf2ff;
+}
+
+.btnRemove {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid #dc2626;
+  background-color: #fff5f5;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnRemove:hover {
+  background-color: #fee2e2;
+}
+.degreeRowHeader {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.degreeTitle {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.degreeActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.btnAdd {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px dashed #2563eb;
+  background-color: #f8fbff;
+  color: #2563eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnAdd:hover {
+  background-color: #eaf2ff;
+}
+
+.btnRemove {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #dc2626;
+  background-color: #fff5f5;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnRemove:hover {
+  background-color: #fee2e2;
+}
+
+.field input,
+.field select,
+.field textarea {
+  appearance: none;
+  background-color: #ffffff;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.field input[type="date"] {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.field input[type="date"]:focus,
+.field input[type="date"]:not(:placeholder-shown) {
+  color: #111827;
+}
+
+.field select {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.field select:not([value=""]) {
+  color: #111827;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px 12px;
+  }
+
+  .headings h1 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .headings p {
+    font-size: 0.9rem;
+  }
+
+  .grid2 {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .span2 {
+    grid-column: auto;
+  }
+
+  .avatarBox {
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .avatarPreview {
+    width: 140px;
+    height: 140px;
+  }
+
+  .field label {
+    font-size: 0.85rem;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 12px 12px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .sectionTitle {
+    font-size: 0.9rem;
+    margin-top: 12px;
+  }
+
+  .degreeRowHeader {
+    margin-top: 16px;
+  }
+
+  .degreeTitle {
+    font-size: 0.9rem;
+  }
+
+  .degreeActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btnAdd,
+  .btnRemove {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}
+@media (max-width: 768px) {
+  .grid2 {
+    max-width: 100%;
+    padding: 0;
+  }
+}
+.selectBox {
+  border: 1px solid #ccc;
+  padding: 11px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #fff;
+}
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border: 1px solid #ccc;
+  margin-top: 4px;
+  border-radius: 6px;
+  background: #fff;
+  z-index: 100;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  outline: none;
+  font-size: 0.95rem;
+}
+
+.optionList {
+  max-height: 220px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+.optionItem {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.optionItem:hover {
+  background: #f0f0f0;
+}
+
+.noResult {
+  padding: 8px 10px;
+  color: #999;
+}
+@media (max-width: 768px) {
+  .field {
+    margin-bottom: 6px;
+  }
+
+  .sectionTitle {
+    margin-top: 16px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+  }
+}
+@media (max-width: 768px) {
+  .degreeRowHeader {
+    background: #f9fafb;
+    padding: 10px;
+    border-radius: 8px;
+  }
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 768px) {
+  .grid2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 24px;
+  }
+}
+@media (max-width: 768px) {
+  .field {
+    gap: 4px;
+  }
+
+  .field label {
+    margin-bottom: 2px;
+    font-size: 0.8rem;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 768px) {
+  .sectionTitle {
+    margin-bottom: -4px;
+  }
+}
+@media (max-width: 768px) {
+  .degreeBody {
+    display: none;
+  }
+
+  .degreeBody.active {
+    display: block;
+  }
+}
+@media (max-width: 768px) {
+  .span2 {
+    display: contents;
+  }
+}

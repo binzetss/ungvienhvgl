@@ -1,0 +1,507 @@
+﻿.container {
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(to bottom, #ffffff 0%, #f4f8fd 40%, #e3f0ff 100%);
+    padding: 80px 20px 60px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.wrapper {
+    max-width: 800px;
+    width: 100%;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.iconWrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, #0e73ba 0%, #108de3 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(14, 115, 186, 0.3);
+    animation: iconBounce 2s ease-in-out infinite;
+}
+
+.iconWrapper svg path {
+    stroke: white;
+}
+
+@keyframes iconBounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #0e73ba;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+    position: relative;
+    padding-bottom: 16px;
+}
+
+.title::after {
+    content: "";
+    width: 180px;
+    height: 4px;
+    background: #0e73ba;
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    border-radius: 4px;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.searchForm {
+    background: white;
+    border-radius: 14px;
+    padding: 40px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    margin-bottom: 24px;
+}
+
+.inputGroup {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.inputIcon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.searchInput {
+    flex: 1;
+    padding: 18px 20px 18px 50px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #111827;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #0e73ba;
+    box-shadow: 0 0 0 4px rgba(14, 115, 186, 0.1);
+}
+
+.searchInput::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.searchButton {
+    padding: 18px 32px;
+    background: linear-gradient(135deg, #0e73ba 0%, #108de3 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(14, 115, 186, 0.4);
+}
+
+.searchButton:hover:not(:disabled) {
+    background: linear-gradient(135deg, #108de3 0%, #0a5a91 100%);
+    box-shadow: 0 6px 20px rgba(14, 115, 186, 0.5);
+    transform: translateY(-2px);
+}
+
+.searchButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.searchButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.errorBox {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ef4444;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-10px);
+    }
+    75% {
+        transform: translateX(10px);
+    }
+}
+
+.resultContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.statusCard {
+    background: white;
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.statusHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.statusLabel {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.statusBadge {
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.infoCard {
+    background: white;
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cardTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 24px 0;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.infoLabel {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.infoValue {
+    font-size: 16px;
+    color: #111827;
+    font-weight: 600;
+}
+
+.noteCard {
+    background: linear-gradient(135deg, #e3f0ff 0%, #c8e1fa 100%);
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: 0 4px 14px rgba(14, 115, 186, 0.15);
+}
+
+.noteCard svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.noteCard p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #0a5a91;
+}
+
+.congratsCard {
+    background: #fff;
+    border-radius: 14px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.congratsAccent {
+    width: 6px;
+    flex-shrink: 0;
+    background: #10b981;
+}
+
+.congratsContent {
+    padding: 32px;
+}
+
+.congratsTitle {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #059669;
+}
+
+.congratsText {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.congratsSubtext {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.passedCard {
+    background: #fff;
+    border-radius: 14px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.passedAccent {
+    width: 6px;
+    flex-shrink: 0;
+    background: #0e73ba;
+}
+
+.passedContent {
+    padding: 32px;
+}
+
+.passedTitle {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0e73ba;
+}
+
+.passedText {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.passedSubtext {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+.condolenceCard {
+    background: #fff;
+    border-radius: 14px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.condolenceAccent {
+    width: 6px;
+    flex-shrink: 0;
+    background: #f59e0b;
+}
+
+.condolenceContent {
+    padding: 32px;
+}
+
+.condolenceTitle {
+    margin: 0 0 12px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #b45309;
+}
+
+.condolenceText {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #374151;
+    line-height: 1.6;
+}
+
+.condolenceSubtext {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 60px 16px 40px;
+    }
+
+    .iconWrapper {
+        width: 64px;
+        height: 64px;
+    }
+
+    .iconWrapper svg {
+        width: 36px;
+        height: 36px;
+    }
+
+    .title {
+        font-size: 28px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+
+    .searchForm {
+        padding: 24px;
+    }
+
+    .inputGroup {
+        flex-direction: column;
+    }
+
+    .searchInput {
+        padding: 16px 20px 16px 50px;
+    }
+
+    .searchButton {
+        justify-content: center;
+        width: 100%;
+        padding: 16px 24px;
+    }
+
+    .infoGrid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .statusCard,
+    .infoCard {
+        padding: 24px;
+    }
+
+    .statusHeader {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .statusBadge {
+        align-self: stretch;
+        text-align: center;
+    }
+
+    .passedContent,
+    .congratsContent,
+    .condolenceContent {
+        padding: 24px;
+    }
+
+    .passedTitle,
+    .congratsTitle,
+    .condolenceTitle {
+        font-size: 19px;
+    }
+}

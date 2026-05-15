@@ -1,0 +1,65 @@
+const INITIAL_FORM_DATA = {
+  fullName: "",
+  dob: "",
+  gender: "",
+  cccd: "",
+  cccdDate: "",
+  cccdPlace: "",
+
+  permanentAddress: "",
+  currentAddress: "",
+  hometownProvince: "",
+  hometownWard: "",
+
+  birthPlace: "",
+  ethnicity: "",
+  religionId: "",
+  maritalStatusId: "",
+  childrenCount: "",
+  youngestChildAge: "",
+
+  phone: "",
+  email: "",
+
+  emergencyName: "",
+  emergencyPhone: "",
+  emergencyRelation: "",
+
+  healthStatus: "",
+  height: "",
+  weight: "",
+  medicalHistory: "",
+
+  degrees: [
+    {
+      degreeMajor: "",
+      degreeLevelId: "",
+      degreeInstitution: "",
+      degreeStudyTypeId: "",
+      graduationYear: "",
+      degreeRank: "",
+      fileUrls: [],
+    },
+  ],
+  cmes: [
+    {
+      cmeName: "",
+      cmeInstitution: "",
+      cmeStudyTypeId: "",
+      cmeStartDate: "",
+      cmeEndDate: "",
+      cmeHours: "",
+      cmeIssueDate: "",
+      fileUrls: [],
+    },
+  ],
+  applyPosition: "",
+  jobDetail: "",
+  workExperience: "",
+  professionalSkills: "",
+  careerExpectation: "",
+  avatarUrl: "",
+  avatarPreview: "",
+  otherCertFileUrls: [],
+  idTrangThaiTuyenDung: 1,
+};
