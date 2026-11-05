@@ -3,9 +3,58 @@ import FormContext from "../store/form-context";
 import classes from "../css/Form.module.css";
 import { validateAndResizeImage, uploadToImageServer } from "../../../utils/imageUtils";
 import { API_BASE_TUYENDUNG as API_BASE } from "../../../config";
+import CharCount from "./CharCount";
+import { FIELD_LIMITS } from "../store/fieldLimits";
+
+export const isUsageFormValid = (formData) => {
+  const degrees = formData.degrees || [];
+  for (let i = 0; i < degrees.length; i++) {
+    const d = degrees[i];
+    const checks = [
+      { key: "degreeMajor",       label: `Chuyên ngành (bằng cấp ${i + 1})` },
+      { key: "degreeInstitution", label: `Đơn vị đào tạo (bằng cấp ${i + 1})` },
+    ];
+    for (const { key, label } of checks) {
+      const val = d[key];
+      const max = FIELD_LIMITS[key];
+      if (typeof val === "string" && val.length > max)
+        return { valid: false, field: key, label, message: `${label} vượt quá ${max} ký tự (hiện tại ${val.length} ký tự). Vui lòng rút ngắn lại.` };
+    }
+  }
+
+  const cmes = formData.cmes || [];
+  for (let i = 0; i < cmes.length; i++) {
+    const c = cmes[i];
+    const checks = [
+      { key: "cmeName",        label: `Tên CME (${i + 1})` },
+      { key: "cmeInstitution", label: `Đơn vị đào tạo CME (${i + 1})` },
+    ];
+    for (const { key, label } of checks) {
+      const val = c[key];
+      const max = FIELD_LIMITS[key];
+      if (typeof val === "string" && val.length > max)
+        return { valid: false, field: key, label, message: `${label} vượt quá ${max} ký tự (hiện tại ${val.length} ký tự). Vui lòng rút ngắn lại.` };
+    }
+  }
+
+  const licenseChecks = [
+    { key: "licenseNumber", label: "Số chứng chỉ hành nghề" },
+    { key: "licensePlace",  label: "Nơi cấp chứng chỉ" },
+    { key: "licenseDegree", label: "Văn bằng chuyên môn" },
+    { key: "licenseScope",  label: "Phạm vi hoạt động" },
+  ];
+  for (const { key, label } of licenseChecks) {
+    const val = formData[key];
+    const max = FIELD_LIMITS[key];
+    if (typeof val === "string" && val.length > max)
+      return { valid: false, field: key, label, message: `${label} vượt quá ${max} ký tự (hiện tại ${val.length} ký tự). Vui lòng rút ngắn lại.` };
+  }
+
+  return { valid: true };
+};
 
 function UsageForm() {
-  const { formData, setFormData } = useContext(FormContext);
+  const { formData, setFormData, showPopup } = useContext(FormContext);
 
   const degrees = Array.isArray(formData.degrees) ? formData.degrees : [];
   const cmes = Array.isArray(formData.cmes) ? formData.cmes : [];
@@ -20,20 +69,38 @@ function UsageForm() {
   const [educationLevels, setEducationLevels] = useState([]);
 
   useEffect(() => {
+    const checkOk = async (r, label) => {
+      if (!r.ok) {
+        const body = await r.text().catch(() => "");
+        throw new Error(`${label}: mã lỗi ${r.status}${body ? ` - ${body.slice(0, 200)}` : ""}`);
+      }
+      return r.json();
+    };
+
     fetch(`${API_BASE}/api/hvoffice2/danh-muc/trinh-do`)
-      .then((r) => r.json())
+      .then((r) => checkOk(r, "Danh sách trình độ"))
       .then((res) => setEducationLevels(res.data || res))
-      .catch(() => {});
+      .catch((err) => {
+        console.error("[Trinh do API ERROR]", err);
+        showPopup(`Không tải được danh sách "Trình độ". Vui lòng tải lại trang. (Chi tiết: ${err.message})`, "error");
+      });
+
     fetch(`${API_BASE}/api/hvoffice2/danh-muc/hinh-thuc-dao-tao`)
-      .then((r) => r.json())
+      .then((r) => checkOk(r, "Danh sách hình thức đào tạo"))
       .then((res) => setStudyTypes(res.data || res))
-      .catch(() => {});
-  }, []);
+      .catch((err) => {
+        console.error("[Hinh thuc dao tao API ERROR]", err);
+        showPopup(`Không tải được danh sách "Hình thức đào tạo". Vui lòng tải lại trang. (Chi tiết: ${err.message})`, "error");
+      });
+  }, [showPopup]);
 
   const changeHandler = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
+  const toggleSkip = (field) => (e) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.checked }));
+  };
 
   const updateDegree = (index, field, value) => {
     const list = [...degrees];
@@ -82,7 +149,7 @@ function UsageForm() {
       list[index] = { ...list[index], fileUrls: [...(list[index].fileUrls || []), ...urls] };
       setFormData((prev) => ({ ...prev, degrees: list }));
     } catch (err) {
-      alert("Lỗi upload ảnh bằng cấp: " + (err?.message || err));
+      showPopup("Lỗi upload ảnh bằng cấp: " + (err?.message || err), "error");
       e.target.value = "";
     } finally {
       setUploadingDegree((prev) => ({ ...prev, [index]: false }));
@@ -160,7 +227,7 @@ function UsageForm() {
       list[index] = { ...list[index], fileUrls: [...(list[index].fileUrls || []), ...urls] };
       setFormData((prev) => ({ ...prev, cmes: list }));
     } catch (err) {
-      alert("Lỗi upload ảnh CME: " + (err?.message || err));
+      showPopup("Lỗi upload ảnh CME: " + (err?.message || err), "error");
       e.target.value = "";
     } finally {
       setUploadingCme((prev) => ({ ...prev, [index]: false }));
@@ -191,7 +258,7 @@ function UsageForm() {
         otherCertFileUrls: [...(prev.otherCertFileUrls || []), ...urls],
       }));
     } catch (err) {
-      alert("Lỗi upload ảnh chứng chỉ: " + (err?.message || err));
+      showPopup("Lỗi upload ảnh chứng chỉ: " + (err?.message || err), "error");
       e.target.value = "";
     } finally {
       setUploadingOther(false);
@@ -230,10 +297,21 @@ function UsageForm() {
         <div className={`${classes.span2}`}>
           <label className={classes.sectionTitle}>
             II. Trình độ chuyên môn – Bằng cấp
+            {formData.applyPositionRequireDegree && (
+              <span className={classes.star}> *</span>
+            )}
+          </label>
+          <label className={classes.skipCheckbox}>
+            <input
+              type="checkbox"
+              checked={!!formData.noDegree}
+              onChange={toggleSkip("noDegree")}
+            />
+            Tôi không có bằng cấp phù hợp
           </label>
         </div>
 
-        {formData.degrees?.map((d, i) => (
+        {!formData.noDegree && formData.degrees?.map((d, i) => (
           <React.Fragment key={i}>
             <div className={`${classes.span2} ${classes.degreeRowHeader}`}>
               <span className={classes.degreeTitle}>Bằng cấp {i + 1}</span>
@@ -244,7 +322,9 @@ function UsageForm() {
               <input
                 value={d.degreeMajor}
                 onChange={(e) => updateDegree(i, "degreeMajor", e.target.value)}
+                maxLength={FIELD_LIMITS.degreeMajor}
               />
+              <CharCount value={d.degreeMajor} max={FIELD_LIMITS.degreeMajor} />
             </div>
             <div className={classes.field}>
               <label>Trình độ</label>
@@ -272,7 +352,9 @@ function UsageForm() {
                 onChange={(e) =>
                   updateDegree(i, "degreeInstitution", e.target.value)
                 }
+                maxLength={FIELD_LIMITS.degreeInstitution}
               />
+              <CharCount value={d.degreeInstitution} max={FIELD_LIMITS.degreeInstitution} />
             </div>
             <div className={classes.field}>
               <label>Hình thức đào tạo</label>
@@ -338,25 +420,35 @@ function UsageForm() {
           </React.Fragment>
         ))}
 
-        <div className={`${classes.span2} ${classes.degreeActions}`}>
-          <button className={classes.btnAdd} onClick={addDegree}>
-            + Thêm bằng cấp
-          </button>
-          {degrees.length > 1 && (
-            <button className={classes.btnRemove} onClick={removeDegree}>
-              Xóa bằng cấp
+        {!formData.noDegree && (
+          <div className={`${classes.span2} ${classes.degreeActions}`}>
+            <button className={classes.btnAdd} onClick={addDegree}>
+              + Thêm bằng cấp
             </button>
-          )}
-        </div>
+            {degrees.length > 1 && (
+              <button className={classes.btnRemove} onClick={removeDegree}>
+                Xóa bằng cấp
+              </button>
+            )}
+          </div>
+        )}
 
-        {/* ================= III. CME ================= */}
         <div className={`${classes.span2}`}>
           <label className={classes.sectionTitle}>
             III. Chứng chỉ đào tạo (CME)
+            <span className={classes.star}> *</span>
+          </label>
+          <label className={classes.skipCheckbox}>
+            <input
+              type="checkbox"
+              checked={!!formData.noCme}
+              onChange={toggleSkip("noCme")}
+            />
+            Tôi không có chứng chỉ CME
           </label>
         </div>
 
-        {cmes.map((c, i) => (
+        {!formData.noCme && cmes.map((c, i) => (
           <React.Fragment key={i}>
             <div className={`${classes.span2} ${classes.degreeRowHeader}`}>
               <span className={classes.degreeTitle}>CME {i + 1}</span>
@@ -367,14 +459,18 @@ function UsageForm() {
               <input
                 value={c.cmeName}
                 onChange={(e) => updateCME(i, "cmeName", e.target.value)}
+                maxLength={FIELD_LIMITS.cmeName}
               />
+              <CharCount value={c.cmeName} max={FIELD_LIMITS.cmeName} />
             </div>
             <div className={classes.field}>
               <label>Đơn vị đào tạo</label>
               <input
                 value={c.cmeInstitution}
                 onChange={(e) => updateCME(i, "cmeInstitution", e.target.value)}
+                maxLength={FIELD_LIMITS.cmeInstitution}
               />
+              <CharCount value={c.cmeInstitution} max={FIELD_LIMITS.cmeInstitution} />
             </div>
             <div className={classes.field}>
               <label>Hình thức</label>
@@ -443,16 +539,18 @@ function UsageForm() {
           </React.Fragment>
         ))}
 
-        <div className={`${classes.span2} ${classes.degreeActions}`}>
-          <button className={classes.btnAdd} onClick={addCME}>
-            + Thêm CME
-          </button>
-          {cmes.length > 1 && (
-            <button className={classes.btnRemove} onClick={removeCME}>
-              Xóa CME
+        {!formData.noCme && (
+          <div className={`${classes.span2} ${classes.degreeActions}`}>
+            <button className={classes.btnAdd} onClick={addCME}>
+              + Thêm CME
             </button>
-          )}
-        </div>
+            {cmes.length > 1 && (
+              <button className={classes.btnRemove} onClick={removeCME}>
+                Xóa CME
+              </button>
+            )}
+          </div>
+        )}
 
         <div className={`${classes.field} ${classes.span2}`}>
           <label className={classes.sectionTitle}>3. Chứng chỉ khác</label>
@@ -543,37 +641,178 @@ function UsageForm() {
           {renderUploadedUrls(otherCertFileUrls, removeOtherCertFileUrl)}
         </div>
 
-        <div className={`${classes.field} ${classes.span2}`}>
-          <label className={classes.sectionTitle}>4. CCHN / GPHN</label>
-        </div>
-
-        {[
-          ["Số", "licenseNumber"],
-          ["Ngày cấp", "licenseIssueDate", "date"],
-          ["Nơi cấp", "licensePlace"],
-          ["Văn bằng chuyên môn", "licenseDegree"],
-        ].map(([label, key, type = "text"]) => (
-          <div className={classes.field} key={key}>
-            <label>{label}</label>
+        <div className={classes.span2}>
+          <label className={classes.sectionTitle}>
+            4. CCHN / GPHN
+            <span className={classes.star}> *</span>
+          </label>
+          <label className={classes.skipCheckbox}>
             <input
-              type={type}
-              value={formData[key] || ""}
-              onChange={changeHandler(key)}
+              type="checkbox"
+              checked={!!formData.noLicense}
+              onChange={toggleSkip("noLicense")}
             />
-          </div>
-        ))}
-
-        <div className={`${classes.field} ${classes.span2}`}>
-          <label>Phạm vi hoạt động</label>
-          <input
-            type="text"
-            value={formData.licenseScope || ""}
-            onChange={changeHandler("licenseScope")}
-          />
+            Tôi không có CCHN/GPHN
+          </label>
         </div>
+
+        {!formData.noLicense && (
+          <>
+            {[
+              ["Số", "licenseNumber", "text", FIELD_LIMITS.licenseNumber],
+              ["Ngày cấp", "licenseIssueDate", "date", null],
+              ["Nơi cấp", "licensePlace", "text", FIELD_LIMITS.licensePlace],
+              ["Văn bằng chuyên môn", "licenseDegree", "text", FIELD_LIMITS.licenseDegree],
+            ].map(([label, key, type, maxLen]) => (
+              <div className={classes.field} key={key}>
+                <label>{label}</label>
+                <input
+                  type={type}
+                  value={formData[key] || ""}
+                  onChange={changeHandler(key)}
+                  {...(maxLen ? { maxLength: maxLen } : {})}
+                />
+                {maxLen && maxLen >= 200 && <CharCount value={formData[key]} max={maxLen} />}
+              </div>
+            ))}
+
+            <div className={`${classes.field} ${classes.span2}`}>
+              <label>Phạm vi hoạt động</label>
+              <input
+                type="text"
+                value={formData.licenseScope || ""}
+                onChange={changeHandler("licenseScope")}
+                maxLength={FIELD_LIMITS.licenseScope}
+              />
+              <CharCount value={formData.licenseScope} max={FIELD_LIMITS.licenseScope} />
+            </div>
+          </>
+        )}
       </div>
     </>
   );
 }
+
+export const isDegreeCmeFilesValid = (formData) => {
+  const degrees = Array.isArray(formData.degrees) ? formData.degrees : [];
+  for (let i = 0; i < degrees.length; i++) {
+    const d = degrees[i];
+    const hasFiles = Array.isArray(d.fileUrls) && d.fileUrls.length > 0;
+    const hasMajor = d.degreeMajor && d.degreeMajor.trim() !== "";
+    if (hasFiles && !hasMajor) {
+      return {
+        valid: false,
+        message: `Bằng cấp ${i + 1}: Bạn đã tải ảnh nhưng chưa nhập Chuyên ngành. Vui lòng bổ sung để ảnh không bị mất.`,
+      };
+    }
+  }
+
+  const cmes = Array.isArray(formData.cmes) ? formData.cmes : [];
+  for (let i = 0; i < cmes.length; i++) {
+    const c = cmes[i];
+    const hasFiles = Array.isArray(c.fileUrls) && c.fileUrls.length > 0;
+    const hasName = c.cmeName && c.cmeName.trim() !== "";
+    if (hasFiles && !hasName) {
+      return {
+        valid: false,
+        message: `CME ${i + 1}: Bạn đã tải ảnh nhưng chưa nhập Tên CME. Vui lòng bổ sung để ảnh không bị mất.`,
+      };
+    }
+  }
+
+  return { valid: true };
+};
+
+export const isDegreeRequirementValid = (formData) => {
+  if (!formData.applyPositionRequireDegree) return { valid: true };
+  if (formData.noDegree) return { valid: true };
+
+  const degrees = Array.isArray(formData.degrees) ? formData.degrees : [];
+  const hasValidDegree = degrees.some(
+    (d) => d.degreeMajor && d.degreeMajor.trim() !== ""
+  );
+
+  if (!hasValidDegree) {
+    const positionName = formData.applyPosition?.trim()
+      ? `"${formData.applyPosition}"`
+      : "đã chọn";
+    return {
+      valid: false,
+      message: `Vị trí ${positionName} yêu cầu bắt buộc nhập thông tin bằng cấp. Vui lòng bổ sung chuyên ngành ở mục Bằng cấp, hoặc tích "Tôi không có bằng cấp phù hợp".`,
+    };
+  }
+
+  return { valid: true };
+};
+
+export const isCmeRequirementValid = (formData) => {
+  if (formData.noCme) return { valid: true };
+
+  const cmes = Array.isArray(formData.cmes) ? formData.cmes : [];
+  const hasValidCme = cmes.some((c) => c.cmeName && c.cmeName.trim() !== "");
+
+  if (!hasValidCme) {
+    return {
+      valid: false,
+      message: `Vui lòng nhập ít nhất 1 chứng chỉ CME, hoặc tích "Tôi không có chứng chỉ CME".`,
+    };
+  }
+
+  return { valid: true };
+};
+
+export const isLicenseRequirementValid = (formData) => {
+  if (formData.noLicense) return { valid: true };
+
+  if (!formData.licenseNumber || formData.licenseNumber.trim() === "") {
+    return {
+      valid: false,
+      message: `Vui lòng nhập số CCHN/GPHN, hoặc tích "Tôi không có CCHN/GPHN".`,
+    };
+  }
+
+  return { valid: true };
+};
+
+export const validateOptionalUsageInfo = (formData) => {
+  const currentYear = new Date().getFullYear();
+  const filled = (v) => v !== "" && v !== null && v !== undefined;
+
+  if (Array.isArray(formData.degrees)) {
+    for (let i = 0; i < formData.degrees.length; i++) {
+      const d = formData.degrees[i];
+      if (!d.degreeMajor || d.degreeMajor.trim() === "") continue;
+
+      if (filled(d.graduationYear)) {
+        const year = Number(d.graduationYear);
+        if (!Number.isInteger(year) || isNaN(year) || year < 1950 || year > currentYear) {
+          return {
+            valid: false,
+            message: `Bằng cấp ${i + 1}: Năm tốt nghiệp không hợp lệ — nhập năm từ 1950 đến ${currentYear}`,
+          };
+        }
+      }
+    }
+  }
+
+  if (Array.isArray(formData.cmes)) {
+    for (let i = 0; i < formData.cmes.length; i++) {
+      const c = formData.cmes[i];
+      if (!c.cmeName || c.cmeName.trim() === "") continue;
+
+      if (filled(c.cmeHours)) {
+        const hours = Number(c.cmeHours);
+        if (isNaN(hours) || hours < 0) {
+          return {
+            valid: false,
+            message: `CME ${i + 1}: Số tiết không hợp lệ — phải là số không âm (ví dụ: 16)`,
+          };
+        }
+      }
+    }
+  }
+
+  return { valid: true };
+};
 
 export default UsageForm;

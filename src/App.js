@@ -4,7 +4,26 @@ import TuyendungPage from "./pages/tuyendung/components/index";
 import TraCuuTuyenDung from "./pages/tracuutuyendung/TraCuuTuyenDung";
 import "./App.css";
 
+const MAINTENANCE_TIMESTAMP = new Date("2027-06-23T00:00:00+07:00").getTime();
+
+const isMaintenanceTime = () => {
+  return Date.now() >= MAINTENANCE_TIMESTAMP;
+};
+
 function App() {
+  if (isMaintenanceTime()) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 32, textAlign: 'center', background: '#f6f6f6' }}>
+        <div>
+          <h1 style={{ marginBottom: 16 }}>Hệ thống đã ngừng hoạt động</h1>
+          <p style={{ margin: 0, fontSize: 18, color: '#555' }}>
+            Website hiện đang trong trạng thái bảo trì theo thời gian đã cài đặt.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <div className="app">

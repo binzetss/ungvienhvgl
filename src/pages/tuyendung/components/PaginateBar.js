@@ -6,7 +6,7 @@ function PaginateBar() {
   const {setCurrentPage, page, numOfPages, validate, validation} = useContext(FormContext);
   const buttonEl = [];
   
-  const stepLabels = ['Cá nhân', 'Chuyên môn', 'Ứng tuyển', 'Xem lại'];
+  const stepLabels = ['Cá nhân', 'Ứng tuyển', 'Chuyên môn', 'Xem lại'];
 
   for(let i=1; i<=numOfPages;i++) {
     const isDone    = i < page;

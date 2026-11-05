@@ -109,6 +109,31 @@ p {
     min-width: 120px;
 }
 
+.supportBox {
+    background-color: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin: 0 0 20px 0;
+    text-align: left;
+}
+
+.supportBox p {
+    margin: 5px 0;
+    font-size: 13.5px;
+    color: #374151;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.supportBox strong {
+    color: #2563eb;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
 .modalButtons {
     display: flex;
     gap: 12px;

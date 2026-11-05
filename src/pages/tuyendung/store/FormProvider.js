@@ -11,6 +11,19 @@ function FormProvider({ children }) {
     structuredClone(INITIAL_FORM_DATA)
   );
 
+  const [popup, setPopup] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showPopup = (message, type = "error") => {
+    setPopup({ show: true, message, type });
+  };
+
+  const closePopup = () => {
+    setPopup({ show: false, message: "", type: "success" });
+  };
 
   const validate = () => {
     const requiredFields = [
@@ -21,7 +34,6 @@ function FormProvider({ children }) {
       "cccdDate",
       "cccdPlace",
       "permanentAddress",
-      "hometownProvince",
       "hometownWard",
       "phone",
       "email",
@@ -64,6 +76,9 @@ function FormProvider({ children }) {
         resetDataState,
         validate,
         formKey,
+        popup,
+        showPopup,
+        closePopup,
       }}
     >
       {children}

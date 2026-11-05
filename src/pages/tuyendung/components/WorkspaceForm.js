@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import FormContext from "../store/form-context";
 import classes from "../css/Form.module.css";
 import Select from "react-select";
+import CharCount from "./CharCount";
+import { FIELD_LIMITS } from "../store/fieldLimits";
 
 export const REQUIRED_FIELDS_ADDITIONAL = [
   { key: "birthPlace", label: "Nơi sinh" },
@@ -28,8 +30,7 @@ export const isAdditionalPersonalInfoValid = (formData) => {
       };
     }
   }
-
-  /* validate phone */
+ 
   const phoneRegex = /^(0\d{9,10}|\+84\d{9,10})$/;
   if (!phoneRegex.test(formData.phone.trim())) {
     return {
@@ -39,8 +40,7 @@ export const isAdditionalPersonalInfoValid = (formData) => {
       message: "Số điện thoại phải từ 10-11 số và bắt đầu từ 0 hoặc +(84) ",
     };
   }
-
-  /* validate email */
+  
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(formData.email.trim())) {
     return {
@@ -160,6 +160,7 @@ function AdditionalPersonalInfoForm() {
             placeholder="Kinh"
             value={formData.ethnicity || ""}
             onChange={changeHandler("ethnicity")}
+            maxLength={FIELD_LIMITS.ethnicity}
           />
         </div>
 
@@ -238,6 +239,7 @@ function AdditionalPersonalInfoForm() {
             placeholder="090xxxxxxx"
             value={formData.phone || ""}
             onChange={changeHandler("phone")}
+            maxLength={FIELD_LIMITS.phone}
           />
         </div>
 
@@ -250,6 +252,7 @@ function AdditionalPersonalInfoForm() {
             placeholder="example@email.com"
             value={formData.email || ""}
             onChange={changeHandler("email")}
+            maxLength={FIELD_LIMITS.email}
           />
         </div>
 
@@ -266,10 +269,9 @@ function AdditionalPersonalInfoForm() {
             placeholder="Nguyễn Văn B"
             value={formData.emergencyName || ""}
             onChange={changeHandler("emergencyName")}
+            maxLength={FIELD_LIMITS.emergencyName}
           />
         </div>
-
-      
 
         <div className={`${classes.field}`}>
           <label>Mối quan hệ</label>
@@ -278,6 +280,7 @@ function AdditionalPersonalInfoForm() {
             placeholder="Cha / Mẹ / Vợ / Chồng"
             value={formData.emergencyRelation || ""}
             onChange={changeHandler("emergencyRelation")}
+            maxLength={FIELD_LIMITS.emergencyRelation}
           />
         </div>
           <div className={`${classes.field} ${classes.span2}`}>
@@ -287,6 +290,7 @@ function AdditionalPersonalInfoForm() {
             placeholder="090xxxxxxx"
             value={formData.emergencyPhone || ""}
             onChange={changeHandler("emergencyPhone")}
+            maxLength={FIELD_LIMITS.emergencyPhone}
           />
         </div>
 
@@ -301,7 +305,9 @@ function AdditionalPersonalInfoForm() {
             placeholder="Tốt / Bình thường / Có vấn đề cần lưu ý"
             value={formData.healthStatus || ""}
             onChange={changeHandler("healthStatus")}
+            maxLength={FIELD_LIMITS.healthStatus}
           />
+          <CharCount value={formData.healthStatus} max={FIELD_LIMITS.healthStatus} />
         </div>
 
         <div className={classes.field}>
@@ -333,7 +339,9 @@ function AdditionalPersonalInfoForm() {
             placeholder="Ví dụ: Cao huyết áp, tiểu đường, dị ứng thuốc..."
             value={formData.medicalHistory || ""}
             onChange={changeHandler("medicalHistory")}
+            maxLength={FIELD_LIMITS.medicalHistory}
           />
+          <CharCount value={formData.medicalHistory} max={FIELD_LIMITS.medicalHistory} />
         </div>
       </div>
     </>

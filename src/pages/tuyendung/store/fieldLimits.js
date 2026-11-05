@@ -1,0 +1,32 @@
+export const FIELD_LIMITS = {
+  fullName:          255,
+  cccd:               12,
+  permanentAddress:  500,
+  currentAddress:    500,
+  hometownWard:      500,
+  birthPlace:        255,
+  ethnicity:         100,
+  phone:              20,
+  email:             255,
+  emergencyName:     255,
+  emergencyPhone:     20,
+  emergencyRelation: 100,
+  healthStatus:      500,
+  medicalHistory:   2000,
+
+  jobDetail:         255,
+  workExperience:   2000,
+  professionalSkills: 2000,
+  softSkills:       2000,
+  careerExpectation: 2000,
+
+  licenseNumber:      50,
+  licensePlace:      255,
+  licenseDegree:     500,
+  licenseScope:     2000,
+
+  degreeMajor:       500,
+  degreeInstitution: 500,
+  cmeName:           500,
+  cmeInstitution:    500,
+};

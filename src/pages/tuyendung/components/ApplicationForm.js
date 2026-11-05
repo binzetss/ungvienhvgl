@@ -1,10 +1,13 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import FormContext from "../store/form-context";
 import classes from "../css/Form.module.css";
+import { API_BASE_TUYENDUNG as API_BASE } from "../../../config";
+import CharCount from "./CharCount";
+import { FIELD_LIMITS } from "../store/fieldLimits";
 
 
 export const REQUIRED_FIELDS_APPLICATION = [
-  { key: "applyPosition", label: "Vị trí ứng tuyển" },
+  { key: "applyPositionId", label: "Vị trí ứng tuyển" },
   { key: "jobDetail", label: "Vị trí công việc chi tiết" },
   { key: "workExperience", label: "Kinh nghiệm làm việc" },
   { key: "professionalSkills", label: "Kỹ năng chuyên môn" },
@@ -30,12 +33,53 @@ export const isApplicationFormValid = (formData) => {
     }
   }
 
+  /* validate field length limits */
+  const lengthChecks = [
+    { key: "jobDetail",          label: "Vị trí công việc chi tiết" },
+    { key: "workExperience",     label: "Kinh nghiệm làm việc" },
+    { key: "professionalSkills", label: "Kỹ năng chuyên môn" },
+    { key: "softSkills",         label: "Kỹ năng mềm / Sở thích" },
+    { key: "careerExpectation",  label: "Nguyện vọng" },
+  ];
+  for (const { key, label } of lengthChecks) {
+    const val = formData[key];
+    const max = FIELD_LIMITS[key];
+    if (typeof val === "string" && val.length > max) {
+      return {
+        valid: false,
+        field: key,
+        label,
+        message: `${label} vượt quá ${max} ký tự (hiện tại ${val.length} ký tự). Vui lòng rút ngắn lại.`,
+      };
+    }
+  }
+
   return { valid: true };
 };
 
 
 function ApplicationForm() {
   const { formData, setFormData, showPopup } = useContext(FormContext);
+  const [positions, setPositions] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/hvoffice2/danh-muc/vi-tri-tuyen-dung`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.text().catch(() => "");
+          throw new Error(`Mã lỗi ${res.status}${body ? `: ${body.slice(0, 200)}` : ""}`);
+        }
+        return res.json();
+      })
+      .then((data) => setPositions(data?.data ?? []))
+      .catch((err) => {
+        console.error("[ViTri API ERROR]", err);
+        showPopup(
+          `Không tải được danh sách vị trí ứng tuyển. Vui lòng tải lại trang, hoặc liên hệ quản trị viên nếu vẫn còn lỗi.\n(Chi tiết: ${err.message})`,
+          "error"
+        );
+      });
+  }, [showPopup]);
 
   const changeHandler = (field) => (e) => {
     setFormData((prev) => ({
@@ -84,15 +128,26 @@ function ApplicationForm() {
             Vị trí ứng tuyển <span className={classes.star}>*</span>
           </label>
           <select
-            value={formData.applyPosition || ""}
-            onChange={changeHandler("applyPosition")}
+            value={formData.applyPositionId ?? ""}
+            onChange={(e) => {
+              const selectedId = e.target.value === "" ? null : Number(e.target.value);
+              const selectedPos = positions.find((p) => p.id === selectedId);
+              setFormData((prev) => ({
+                ...prev,
+                applyPositionId: selectedId,
+                applyPosition: selectedPos?.ten ?? "",
+                applyPositionRequireDegree: selectedPos
+                  ? Number(selectedPos.isYeuCauBangCap) === 1
+                  : false,
+              }));
+            }}
           >
             <option value="">-- Chọn --</option>
-            <option value="Bác sĩ">Bác sĩ</option>
-            <option value="Điều dưỡng">Điều dưỡng</option>
-            <option value="Kỹ thuật viên">Kỹ thuật viên</option>
-            <option value="Hành chính">Hành chính</option>
-            <option value="Khác">Khác</option>
+            {positions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.ten}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -105,7 +160,9 @@ function ApplicationForm() {
             placeholder="Ví dụ: Bác sĩ Nội tim mạch"
             value={formData.jobDetail || ""}
             onChange={changeHandler("jobDetail")}
+            maxLength={FIELD_LIMITS.jobDetail}
           />
+          <CharCount value={formData.jobDetail} max={FIELD_LIMITS.jobDetail} />
         </div>
 
         <div className={`${classes.field} ${classes.span2}`}>
@@ -117,7 +174,9 @@ function ApplicationForm() {
             placeholder="Ngày bắt đầu – ngày kết thúc – Chức danh – Vị trí – Đơn vị công tác"
             value={formData.workExperience || ""}
             onChange={changeHandler("workExperience")}
+            maxLength={FIELD_LIMITS.workExperience}
           />
+          <CharCount value={formData.workExperience} max={FIELD_LIMITS.workExperience} />
         </div>
 
         <div className={`${classes.field} ${classes.span2}`}>
@@ -129,7 +188,9 @@ function ApplicationForm() {
             placeholder="Ví dụ: Chẩn đoán hình ảnh, phẫu thuật nội soi..."
             value={formData.professionalSkills || ""}
             onChange={changeHandler("professionalSkills")}
+            maxLength={FIELD_LIMITS.professionalSkills}
           />
+          <CharCount value={formData.professionalSkills} max={FIELD_LIMITS.professionalSkills} />
         </div>
 
         <div className={`${classes.field} ${classes.span2}`}>
@@ -141,7 +202,9 @@ function ApplicationForm() {
             placeholder="Giao tiếp, làm việc nhóm, đọc sách..."
             value={formData.softSkills || ""}
             onChange={changeHandler("softSkills")}
+            maxLength={FIELD_LIMITS.softSkills}
           />
+          <CharCount value={formData.softSkills} max={FIELD_LIMITS.softSkills} />
         </div>
 
         <div className={`${classes.field} ${classes.span2}`}>
@@ -154,7 +217,9 @@ function ApplicationForm() {
             placeholder="Mong muốn phát triển chuyên môn, gắn bó lâu dài..."
             value={formData.careerExpectation || ""}
             onChange={changeHandler("careerExpectation")}
+            maxLength={FIELD_LIMITS.careerExpectation}
           />
+          <CharCount value={formData.careerExpectation} max={FIELD_LIMITS.careerExpectation} />
         </div>
       </div>
     </>

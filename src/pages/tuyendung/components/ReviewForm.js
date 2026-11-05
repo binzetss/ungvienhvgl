@@ -34,7 +34,7 @@ function Section({ icon, title, children }) {
 
 function ReviewForm() {
   const { formData } = useContext(FormContext);
-  const [previewImage, setPreviewImage] = React.useState(null); // kept for lightbox
+  const [previewImage, setPreviewImage] = React.useState(null);  
 
   const renderFileLinks = (urls) => {
     if (!urls || urls.length === 0) return val("");
@@ -58,8 +58,7 @@ function ReviewForm() {
       </div>
 
       <div className={rv.wrapper}>
-
-        {/* ===== I. CÁ NHÂN ===== */}
+ 
         <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} title="I. Thông tin cá nhân">
           {formData.avatarPreview && (
             <div className={rv.avatarWrap}>
@@ -95,8 +94,7 @@ function ReviewForm() {
             </div>
           )}
         </Section>
-
-        {/* ===== II. SỨC KHỎE ===== */}
+ 
         <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>} title="II. Thông tin sức khỏe">
           <div className={rv.grid2}>
             <Row label="Tình trạng sức khỏe" value={formData.healthStatus} />
@@ -105,11 +103,9 @@ function ReviewForm() {
             <Row label="Tiền sử bệnh"         value={formData.medicalHistory} />
           </div>
         </Section>
-
-        {/* ===== III. CHUYÊN MÔN ===== */}
+ 
         <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>} title="III. Trình độ chuyên môn">
-
-          {/* Bằng cấp */}
+ 
           {formData.degrees?.filter(d => d.degreeMajor).map((d, i) => (
             <div key={i} className={rv.subSection}>
               <div className={rv.subTitle}>Bằng cấp {i + 1}</div>
@@ -124,8 +120,7 @@ function ReviewForm() {
               </div>
             </div>
           ))}
-
-          {/* CME */}
+ 
           {formData.cmes?.filter(c => c.cmeName).map((c, i) => (
             <div key={i} className={rv.subSection}>
               <div className={rv.subTitle}>CME {i + 1}</div>
@@ -140,8 +135,7 @@ function ReviewForm() {
               </div>
             </div>
           ))}
-
-          {/* CCHN */}
+ 
           {formData.licenseNumber && (
             <div className={rv.subSection}>
               <div className={rv.subTitle}>CCHN / GPHN</div>
@@ -155,8 +149,7 @@ function ReviewForm() {
             </div>
           )}
         </Section>
-
-        {/* ===== IV. ỨNG TUYỂN ===== */}
+ 
         <Section icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>} title="IV. Thông tin ứng tuyển">
           <div className={rv.grid2}>
             <Row label="Vị trí ứng tuyển"    value={formData.applyPosition} />
@@ -169,8 +162,7 @@ function ReviewForm() {
         </Section>
 
       </div>
-
-      {/* Lightbox preview ảnh */}
+ 
       {previewImage && (
         <div className={rv.lightbox} onClick={() => setPreviewImage(null)}>
           <img src={previewImage} alt="Preview" className={rv.lightboxImg} onClick={e => e.stopPropagation()} />

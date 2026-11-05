@@ -8,35 +8,75 @@ import ReviewForm from "./ReviewForm";
 import FormContext from "../store/form-context";
 import { API_BASE } from "../../../config";
 import { isApplicationFormValid } from "./ApplicationForm";
-import { isUserPersonalInfoValid } from "./UserNameForm";
+import { isUserPersonalInfoValid, validateOptionalPersonalInfo } from "./UserNameForm";
+import {
+  isUsageFormValid,
+  validateOptionalUsageInfo,
+  isDegreeRequirementValid,
+  isDegreeCmeFilesValid,
+  isCmeRequirementValid,
+  isLicenseRequirementValid,
+} from "./UsageForm";
+
+const SUBMIT_TIMEOUT_MS = 30000;
+
+// Best-effort extraction of a human-readable message from a failed HTTP response.
+// Spring Boot's default error body is JSON ({message, error, ...}); some errors
+// come back as plain text/HTML. Falls back gracefully either way.
+async function extractErrorMessage(res) {
+  let bodyText = "";
+  try {
+    bodyText = await res.text();
+  } catch {
+    return "";
+  }
+  if (!bodyText) return "";
+  try {
+    const json = JSON.parse(bodyText);
+    return json.message || json.error || bodyText.slice(0, 300);
+  } catch {
+    return bodyText.slice(0, 300);
+  }
+}
 
 function LandingFormPage() {
-  const { page, setCurrentPage, numOfPages, formData, resetDataState } =
-    useContext(FormContext);
+  const {
+    page,
+    setCurrentPage,
+    numOfPages,
+    formData,
+    resetDataState,
+    popup,
+    showPopup,
+    closePopup,
+  } = useContext(FormContext);
 const { formKey } = useContext(FormContext);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [page]);
 
-  const [popup, setPopup] = useState({
-    show: false,
-    message: "",
-    type: "success",
+  // Đọc từ public/supportContact.json lúc chạy (không nhúng cứng lúc build) —
+  // để đổi số điện thoại chỉ cần sửa thẳng file JSON đã deploy trên IIS
+  // (D:\...\build\supportContact.json), không cần build/deploy lại code.
+  const [supportContact, setSupportContact] = useState({
+    technical: { label: "Hỗ trợ kỹ thuật", phone: "" },
+    profile: { label: "Hồ sơ/tuyển dụng", phone: "" },
   });
+  useEffect(() => {
+    // cache: "no-store" + query bust theo thời gian — để mỗi lần vào trang đều
+    // lấy đúng bản JSON mới nhất trên server, không bị trình duyệt lấy bản cũ
+    // đã cache lại trước đó.
+    fetch(`/supportContact.json?t=${Date.now()}`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then(setSupportContact)
+      .catch(() => {});
+  }, []);
 
   const [confirmPopup, setConfirmPopup] = useState({
     show: false,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const showPopup = (message, type) => {
-    setPopup({ show: true, message, type });
-  };
-
-  const closePopup = () => {
-    setPopup({ show: false, message: "", type: "success" });
-  };
 
   const showConfirmPopup = () => {
     setConfirmPopup({ show: true });
@@ -52,17 +92,34 @@ const { formKey } = useContext(FormContext);
   };
 
   const pageSet = async () => {
-    /* ===== VALIDATE PAGE ===== */
+     
     if (page === 1) {
       const r = isUserPersonalInfoValid(formData);
       if (!r.valid) return showPopup(r.message, "error");
-      // Hiển thị popup xác nhận email và số điện thoại
+      const opt = validateOptionalPersonalInfo(formData);
+      if (!opt.valid) return showPopup(opt.message, "error");
+
       return showConfirmPopup();
     }
 
-    if (page === 3) {
+    if (page === 2) {
       const r = isApplicationFormValid(formData);
       if (!r.valid) return showPopup(r.message, "error");
+    }
+
+    if (page === 3) {
+      const files = isDegreeCmeFilesValid(formData);
+      if (!files.valid) return showPopup(files.message, "error");
+      const req = isDegreeRequirementValid(formData);
+      if (!req.valid) return showPopup(req.message, "error");
+      const cme = isCmeRequirementValid(formData);
+      if (!cme.valid) return showPopup(cme.message, "error");
+      const license = isLicenseRequirementValid(formData);
+      if (!license.valid) return showPopup(license.message, "error");
+      const lengths = isUsageFormValid(formData);
+      if (!lengths.valid) return showPopup(lengths.message, "error");
+      const opt = validateOptionalUsageInfo(formData);
+      if (!opt.valid) return showPopup(opt.message, "error");
     }
 
     if (page < numOfPages) {
@@ -70,48 +127,124 @@ const { formKey } = useContext(FormContext);
       return;
     }
 
-    /* ===== VALIDATE ALL ===== */
-    const validators = [
-      isUserPersonalInfoValid,
-      isApplicationFormValid,
+    const validatorSteps = [
+      { fn: isUserPersonalInfoValid,      targetPage: 1, pageLabel: "Trang 1 - Thông tin cá nhân" },
+      { fn: validateOptionalPersonalInfo, targetPage: 1, pageLabel: "Trang 1 - Thông tin cá nhân" },
+      { fn: isApplicationFormValid,       targetPage: 2, pageLabel: "Trang 2 - Ứng tuyển" },
+      { fn: isDegreeCmeFilesValid,        targetPage: 3, pageLabel: "Trang 3 - Sức khỏe & chuyên môn" },
+      { fn: isDegreeRequirementValid,     targetPage: 3, pageLabel: "Trang 3 - Sức khỏe & chuyên môn" },
+      { fn: isCmeRequirementValid,        targetPage: 3, pageLabel: "Trang 3 - Sức khỏe & chuyên môn" },
+      { fn: isLicenseRequirementValid,    targetPage: 3, pageLabel: "Trang 3 - Sức khỏe & chuyên môn" },
+      { fn: isUsageFormValid,             targetPage: 3, pageLabel: "Trang 3 - Sức khỏe & chuyên môn" },
+      { fn: validateOptionalUsageInfo,    targetPage: 3, pageLabel: "Trang 3 - Sức khỏe & chuyên môn" },
     ];
 
-    for (const v of validators) {
-      const r = v(formData);
+    for (const { fn, targetPage, pageLabel } of validatorSteps) {
+      const r = fn(formData);
       if (!r.valid) {
-        showPopup(r.message, "error");
+        setCurrentPage(targetPage);
+        showPopup(`${r.message}\n\n(${pageLabel})`, "error");
         return;
       }
     }
-
-    /* ================= SUBMIT ================= */
+ 
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       const form = new FormData();
 
-      // ================== CLEAN JSON (KHÔNG CHỨA FILE) ==================
+      // Convert "" → null for Integer/Date/Number fields the backend expects.
+      // Jackson does not coerce an empty string "" to Integer/LocalDate/Double,
+      // so leaving an optional numeric/date field blank throws a deserialization
+      // error that fails the whole submit with no useful message.
+      const toIntOrNull = (v) =>
+        v === "" || v === null || v === undefined ? null : Number(v);
+      const toDateOrNull = (v) =>
+        v === "" || v === null || v === undefined ? null : v;
+      const toNumOrNull = (v) =>
+        v === "" || v === null || v === undefined ? null : Number(v);
+
+      const cleanCmes = (Array.isArray(formData.cmes) ? formData.cmes : []).map(
+        (c) => ({
+          ...c,
+          cmeStartDate: toDateOrNull(c.cmeStartDate),
+          cmeEndDate: toDateOrNull(c.cmeEndDate),
+          cmeIssueDate: toDateOrNull(c.cmeIssueDate),
+          cmeHours: toNumOrNull(c.cmeHours),
+        })
+      );
+
+      const otherCertFileUrls = Array.isArray(formData.otherCertFileUrls)
+        ? formData.otherCertFileUrls
+        : [];
+      const otherCertName = formData.otherCertificate?.name?.trim();
+      const hasOtherCert = !!otherCertName || otherCertFileUrls.length > 0;
+
+      const cleanOtherCertificate = hasOtherCert
+        ? {
+            ...(formData.otherCertificate || {}),
+            name: otherCertName || "Chứng chỉ khác",
+            startDate: toDateOrNull(formData.otherCertificate?.startDate),
+            endDate: toDateOrNull(formData.otherCertificate?.endDate),
+            issueDate: toDateOrNull(formData.otherCertificate?.issueDate),
+            hours: toNumOrNull(formData.otherCertificate?.hours),
+            fileUrls: otherCertFileUrls,
+          }
+        : null;
+
       const cleanData = {
         ...formData,
         avatarPreview: null,
         idTrangThaiTuyenDung: 1,
+        gender: toIntOrNull(formData.gender),
+        religionId: toIntOrNull(formData.religionId),
+        maritalStatusId: toIntOrNull(formData.maritalStatusId),
+        childrenCount: toIntOrNull(formData.childrenCount),
+        youngestChildAge: toIntOrNull(formData.youngestChildAge),
+        weight: toIntOrNull(formData.weight),
+        applyPositionId: toIntOrNull(formData.applyPositionId),
+        licenseIssueDate: toDateOrNull(formData.licenseIssueDate),
+        cmes: cleanCmes,
+        otherCertificate: cleanOtherCertificate,
       };
 
       form.append("data", JSON.stringify(cleanData));
 
-      const res = await fetch(`${API_BASE}/api/hvoffice2/tuyen-dung`, {
-        method: "POST",
-        body: form,
-      });
+      let res;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), SUBMIT_TIMEOUT_MS);
+        try {
+          res = await fetch(`${API_BASE}/api/hvoffice2/tuyen-dung`, {
+            method: "POST",
+            body: form,
+            signal: controller.signal,
+          });
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      } catch (networkErr) {
+        if (networkErr.name === "AbortError") {
+          throw new Error(
+            `Gửi hồ sơ quá thời gian chờ (${SUBMIT_TIMEOUT_MS / 1000}s). Vui lòng kiểm tra kết nối mạng và thử lại. Thông tin bạn đã nhập vẫn còn nguyên, không cần nhập lại.`
+          );
+        }
+        throw new Error(
+          `Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối Internet và thử lại. (Chi tiết: ${networkErr.message})`
+        );
+      }
 
       if (!res.ok) {
-        throw new Error("Submit failed");
+        const serverMessage = await extractErrorMessage(res);
+        throw new Error(
+          `Máy chủ từ chối yêu cầu (mã lỗi ${res.status}).${serverMessage ? ` Chi tiết: ${serverMessage}` : " Vui lòng thử lại hoặc liên hệ quản trị viên."}`
+        );
       }
 
       const tuyenDungId = await res.json();
       console.log("Tuyen dung ID:", tuyenDungId);
 
-   
+
       const detailRes = await fetch(`${API_BASE}/api/hvoffice2/tuyen-dung/${tuyenDungId}`);
       if (detailRes.ok) {
         const detail = await detailRes.json();
@@ -128,8 +261,13 @@ const { formKey } = useContext(FormContext);
       resetDataState();
       setCurrentPage(1);
     } catch (err) {
-      console.error(err);
-      showPopup("Lỗi khi gửi dữ liệu lên server", "error");
+      console.error("Submit tuyen-dung failed:", err);
+      showPopup(
+        err?.message
+          ? `Gửi hồ sơ thất bại.\n\n${err.message}`
+          : "Lỗi khi gửi dữ liệu lên server. Vui lòng thử lại hoặc liên hệ quản trị viên.",
+        "error"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -153,6 +291,12 @@ const { formKey } = useContext(FormContext);
               {popup.type === "success" ? "Thành Công!" : "Lỗi!"}
             </h2>
             <p className={classes.modalMessage}>{popup.message}</p>
+            {popup.type === "error" && (
+              <div className={classes.supportBox}>
+                <p>Hỗ trợ kỹ thuật <strong>{supportContact.technical.phone}</strong></p>
+                <p>Hồ sơ/tuyển dụng <strong>{supportContact.profile.phone}</strong></p>
+              </div>
+            )}
             <button className={classes.modalButton} onClick={closePopup}>
               Đóng
             </button>
@@ -232,8 +376,8 @@ const { formKey } = useContext(FormContext);
       <div className="card">
         <PaginateBar />
         {page === 1 && <UserNameForm />}
-        {page === 2 && <UsageForm />}
-        {page === 3 && <ApplicationForm />}
+        {page === 2 && <ApplicationForm />}
+        {page === 3 && <UsageForm />}
         {page === 4 && <ReviewForm />}
         <br />
         <button
@@ -244,9 +388,14 @@ const { formKey } = useContext(FormContext);
         >
           {isSubmitting ? "Đang gửi..." : page === numOfPages ? "Gửi Thông Tin" : "Tiếp Theo"}
         </button>
+
+        <div style={{ marginTop: 10, width: "100%", textAlign: "left", color: "#dc2626", fontSize: 12.5, fontFamily: "'Roboto', sans-serif", lineHeight: 1.6 }}>
+          <div>Hỗ trợ kỹ thuật: <strong>{supportContact.technical.phone}</strong></div>
+          <div>Hồ sơ/tuyển dụng: <strong>{supportContact.profile.phone}</strong></div>
+        </div>
       </div>
     </div>
-  
+
   );
 }
 

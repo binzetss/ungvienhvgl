@@ -4,10 +4,14 @@ import classes from "../css/Form.module.css";
 import Select from "react-select";
 import { API_BASE } from "../../../config";
 import { uploadToImageServer } from "../../../utils/imageUtils";
+import CharCount from "./CharCount";
+import { FIELD_LIMITS } from "../store/fieldLimits";
 
 
 export const REQUIRED_FIELDS = [
+  { key: "avatarUrl", label: "Ảnh đại diện" },
   { key: "fullName", label: "Họ và tên" },
+  { key: "currentAddress", label: "Chỗ ở hiện tại" },
   { key: "dob", label: "Ngày sinh" },
   { key: "gender", label: "Giới tính" },
   { key: "cccd", label: "Số CCCD" },
@@ -71,11 +75,84 @@ export const isUserPersonalInfoValid = (formData) => {
     };
   }
 
+  /* validate field length limits */
+  const lengthChecks = [
+    { key: "fullName",          label: "Họ và tên" },
+    { key: "permanentAddress",  label: "Địa chỉ thường trú" },
+    { key: "currentAddress",    label: "Chỗ ở hiện tại" },
+    { key: "hometownWard",      label: "Quê quán" },
+    { key: "birthPlace",        label: "Nơi sinh" },
+    { key: "ethnicity",         label: "Dân tộc" },
+    { key: "emergencyName",     label: "Người liên hệ – Họ tên" },
+    { key: "emergencyRelation", label: "Người liên hệ – Quan hệ" },
+    { key: "healthStatus",      label: "Tình trạng sức khỏe" },
+    { key: "medicalHistory",    label: "Tiền sử bệnh" },
+  ];
+  for (const { key, label } of lengthChecks) {
+    const val = formData[key];
+    const max = FIELD_LIMITS[key];
+    if (typeof val === "string" && val.length > max) {
+      return {
+        valid: false,
+        field: key,
+        label,
+        message: `${label} vượt quá ${max} ký tự (hiện tại ${val.length} ký tự). Vui lòng rút ngắn lại.`,
+      };
+    }
+  }
+
+  return { valid: true };
+};
+
+export const validateOptionalPersonalInfo = (formData) => {
+  const filled = (v) => v !== "" && v !== null && v !== undefined;
+
+  if (filled(formData.childrenCount)) {
+    const val = Number(formData.childrenCount);
+    if (isNaN(val) || !Number.isInteger(val) || val < 0) {
+      return { valid: false, message: "Số con phải là số nguyên không âm (ví dụ: 2)" };
+    }
+  }
+
+  if (filled(formData.youngestChildAge)) {
+    const val = Number(formData.youngestChildAge);
+    if (isNaN(val) || !Number.isInteger(val) || val < 0) {
+      return { valid: false, message: "Tuổi con nhỏ nhất phải là số nguyên không âm (ví dụ: 5)" };
+    }
+  }
+
+  if (filled(formData.height)) {
+    const val = Number(formData.height);
+    if (isNaN(val) || val <= 0 || val > 300) {
+      return { valid: false, message: "Chiều cao không hợp lệ — nhập số cm từ 1 đến 300 (ví dụ: 165)" };
+    }
+  }
+
+  if (filled(formData.weight)) {
+    const val = Number(formData.weight);
+    if (isNaN(val) || !Number.isInteger(val) || val <= 0 || val > 500) {
+      return { valid: false, message: "Cân nặng không hợp lệ — nhập số kg nguyên từ 1 đến 500 (ví dụ: 60)" };
+    }
+  }
+
+  if (filled(formData.emergencyPhone)) {
+    const phone = String(formData.emergencyPhone).trim();
+    if (phone !== "") {
+      const phoneRegex = /^(0\d{9,10}|\+84\d{9,10})$/;
+      if (!phoneRegex.test(phone)) {
+        return {
+          valid: false,
+          message: "Số điện thoại người thân không hợp lệ — phải từ 10-11 số, bắt đầu từ 0 hoặc +84 (ví dụ: 0901234567)",
+        };
+      }
+    }
+  }
+
   return { valid: true };
 };
 
 function UserPersonalInfoForm() {
-  const { formData, setFormData } = useContext(FormContext);
+  const { formData, setFormData, showPopup } = useContext(FormContext);
   const fileRef = useRef(null);
   const [religions, setReligions] = useState([]);
   const [maritalStatuses, setMaritalStatuses] = useState([]);
@@ -130,7 +207,7 @@ function UserPersonalInfoForm() {
 
     const MAX_SIZE_MB = 10;
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      alert(`Ảnh vượt quá ${MAX_SIZE_MB}MB. Vui lòng chọn ảnh nhỏ hơn.`);
+      showPopup(`Ảnh vượt quá ${MAX_SIZE_MB}MB. Vui lòng chọn ảnh nhỏ hơn.`, "error");
       e.target.value = "";
       return;
     }
@@ -147,7 +224,11 @@ function UserPersonalInfoForm() {
         avatarPreview: url,
       }));
     } catch (err) {
-      alert("Lỗi upload ảnh đại diện: " + err.message);
+      // Upload failed — clear the local preview too, otherwise the applicant
+      // sees a picture that was never actually saved and thinks it worked.
+      setFormData((prev) => ({ ...prev, avatarUrl: "", avatarPreview: "" }));
+      e.target.value = "";
+      showPopup("Lỗi upload ảnh đại diện: " + err.message, "error");
     } finally {
       setUploadingAvatar(false);
     }
@@ -232,6 +313,9 @@ function UserPersonalInfoForm() {
       </div>
 
       <div className={classes.avatarBox} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <label style={{ display: 'block', marginBottom: 8 }}>
+          Ảnh đại diện <span className={classes.star}>*</span>
+        </label>
         <div
           className={classes.avatarPreview}
           onClick={() => fileRef.current.click()}
@@ -243,6 +327,11 @@ function UserPersonalInfoForm() {
             <span>Chọn ảnh đại diện</span>
           )}
         </div>
+        {uploadingAvatar && (
+          <small className={classes.hint} style={{ display: "block", marginTop: 4 }}>
+            Đang tải ảnh lên...
+          </small>
+        )}
         <input
           type="file"
           accept="image/*"
@@ -263,8 +352,10 @@ function UserPersonalInfoForm() {
             placeholder="Nguyễn Văn A"
             value={formData.fullName || ""}
             onChange={changeHandler("fullName")}
+            maxLength={FIELD_LIMITS.fullName}
             required
           />
+          <CharCount value={formData.fullName} max={FIELD_LIMITS.fullName} />
         </div>
 
         <div className={classes.field}>
@@ -308,6 +399,7 @@ function UserPersonalInfoForm() {
             placeholder="Tỉnh / Thành phố"
             value={formData.birthPlace || ""}
             onChange={changeHandler("birthPlace")}
+            maxLength={FIELD_LIMITS.birthPlace}
           />
         </div>
 
@@ -320,6 +412,7 @@ function UserPersonalInfoForm() {
             placeholder="Gồm 12 chữ số"
             value={formData.cccd || ""}
             onChange={changeHandler("cccd")}
+            maxLength={FIELD_LIMITS.cccd}
             required
             style={cccdError ? { borderColor: "#dc2626" } : {}}
           />
@@ -366,8 +459,10 @@ function UserPersonalInfoForm() {
             placeholder="Ví dụ: Hà Nội"
             value={formData.hometownWard || ""}
             onChange={changeHandler("hometownWard")}
+            maxLength={FIELD_LIMITS.hometownWard}
             required
           />
+          <CharCount value={formData.hometownWard} max={FIELD_LIMITS.hometownWard} />
         </div>
 
         <div className={classes.field}>
@@ -379,21 +474,27 @@ function UserPersonalInfoForm() {
             placeholder="Số nhà, đường, phường/xã, quận/huyện"
             value={formData.permanentAddress || ""}
             onChange={changeHandler("permanentAddress")}
+            maxLength={FIELD_LIMITS.permanentAddress}
             required
           />
+          <CharCount value={formData.permanentAddress} max={FIELD_LIMITS.permanentAddress} />
         </div>
 
         <div className={classes.field}>
-          <label>Chỗ ở hiện tại</label>
+          <label>
+            Chỗ ở hiện tại <span className={classes.star}>*</span>
+          </label>
           <input
             type="text"
             placeholder="Nếu khác địa chỉ thường trú"
             value={formData.currentAddress || ""}
             onChange={changeHandler("currentAddress")}
+            maxLength={FIELD_LIMITS.currentAddress}
+            required
           />
+          <CharCount value={formData.currentAddress} max={FIELD_LIMITS.currentAddress} />
         </div>
-
-        {/* Thêm phần từ WorkspaceForm */}
+ 
         <div className={classes.field}>
           <label>
             Dân tộc <span className={classes.star}>*</span>
@@ -403,6 +504,7 @@ function UserPersonalInfoForm() {
             placeholder="Kinh"
             value={formData.ethnicity || ""}
             onChange={changeHandler("ethnicity")}
+            maxLength={FIELD_LIMITS.ethnicity}
           />
         </div>
 
@@ -481,6 +583,7 @@ function UserPersonalInfoForm() {
             placeholder="090xxxxxxx"
             value={formData.phone || ""}
             onChange={changeHandler("phone")}
+            maxLength={FIELD_LIMITS.phone}
           />
         </div>
 
@@ -493,6 +596,7 @@ function UserPersonalInfoForm() {
             placeholder="example@email.com"
             value={formData.email || ""}
             onChange={changeHandler("email")}
+            maxLength={FIELD_LIMITS.email}
           />
         </div>
 
@@ -509,6 +613,7 @@ function UserPersonalInfoForm() {
             placeholder="Nguyễn Văn B"
             value={formData.emergencyName || ""}
             onChange={changeHandler("emergencyName")}
+            maxLength={FIELD_LIMITS.emergencyName}
           />
         </div>
 
@@ -519,6 +624,7 @@ function UserPersonalInfoForm() {
             placeholder="Cha / Mẹ / Vợ / Chồng"
             value={formData.emergencyRelation || ""}
             onChange={changeHandler("emergencyRelation")}
+            maxLength={FIELD_LIMITS.emergencyRelation}
           />
         </div>
 
@@ -529,6 +635,7 @@ function UserPersonalInfoForm() {
             placeholder="090xxxxxxx"
             value={formData.emergencyPhone || ""}
             onChange={changeHandler("emergencyPhone")}
+            maxLength={FIELD_LIMITS.emergencyPhone}
           />
         </div>
 
@@ -543,7 +650,9 @@ function UserPersonalInfoForm() {
             placeholder="Tốt / Bình thường / Có vấn đề cần lưu ý"
             value={formData.healthStatus || ""}
             onChange={changeHandler("healthStatus")}
+            maxLength={FIELD_LIMITS.healthStatus}
           />
+          <CharCount value={formData.healthStatus} max={FIELD_LIMITS.healthStatus} />
         </div>
 
         <div className={classes.field}>
@@ -575,7 +684,9 @@ function UserPersonalInfoForm() {
             placeholder="Ví dụ: Cao huyết áp, tiểu đường, dị ứng thuốc..."
             value={formData.medicalHistory || ""}
             onChange={changeHandler("medicalHistory")}
+            maxLength={FIELD_LIMITS.medicalHistory}
           />
+          <CharCount value={formData.medicalHistory} max={FIELD_LIMITS.medicalHistory} />
         </div>
       </div>
     </>
